@@ -39,6 +39,33 @@ type SearchResponse struct {
 	NextPageToken string         `json:"next_page_token,omitempty"`
 }
 
+// AutocompleteRequest defines input for autocomplete suggestions.
+type AutocompleteRequest struct {
+	Input        string        `json:"input"`
+	SessionToken string        `json:"session_token,omitempty"`
+	Limit        int           `json:"limit,omitempty"`
+	Language     string        `json:"language,omitempty"`
+	Region       string        `json:"region,omitempty"`
+	LocationBias *LocationBias `json:"location_bias,omitempty"`
+}
+
+// AutocompleteResponse contains suggestions from autocomplete.
+type AutocompleteResponse struct {
+	Suggestions []AutocompleteSuggestion `json:"suggestions"`
+}
+
+// AutocompleteSuggestion is a place or query prediction.
+type AutocompleteSuggestion struct {
+	Kind           string   `json:"kind"`
+	PlaceID        string   `json:"place_id,omitempty"`
+	Place          string   `json:"place,omitempty"`
+	Text           string   `json:"text,omitempty"`
+	MainText       string   `json:"main_text,omitempty"`
+	SecondaryText  string   `json:"secondary_text,omitempty"`
+	Types          []string `json:"types,omitempty"`
+	DistanceMeters *int     `json:"distance_meters,omitempty"`
+}
+
 // PlaceSummary is a compact view of a place.
 type PlaceSummary struct {
 	PlaceID    string   `json:"place_id"`

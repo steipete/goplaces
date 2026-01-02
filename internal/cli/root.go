@@ -6,10 +6,11 @@ import (
 
 // Root defines the CLI command tree.
 type Root struct {
-	Global  GlobalOptions `embed:""`
-	Search  SearchCmd     `cmd:"" help:"Search places by text query."`
-	Details DetailsCmd    `cmd:"" help:"Fetch place details by place ID."`
-	Resolve ResolveCmd    `cmd:"" help:"Resolve a location string to candidate places."`
+	Global       GlobalOptions   `embed:""`
+	Autocomplete AutocompleteCmd `cmd:"" help:"Autocomplete places and queries."`
+	Search       SearchCmd       `cmd:"" help:"Search places by text query."`
+	Details      DetailsCmd      `cmd:"" help:"Fetch place details by place ID."`
+	Resolve      ResolveCmd      `cmd:"" help:"Resolve a location string to candidate places."`
 }
 
 // GlobalOptions are flags shared by all commands.
@@ -38,6 +39,18 @@ type SearchCmd struct {
 	Lat        *float64 `help:"Latitude for location bias."`
 	Lng        *float64 `help:"Longitude for location bias."`
 	RadiusM    *float64 `help:"Radius in meters for location bias."`
+}
+
+// AutocompleteCmd runs autocomplete queries.
+type AutocompleteCmd struct {
+	Input        string   `arg:"" name:"input" help:"Autocomplete input text."`
+	Limit        int      `help:"Max suggestions (1-20)." default:"5"`
+	SessionToken string   `help:"Session token for billing consistency."`
+	Language     string   `help:"BCP-47 language code (e.g. en, en-US)."`
+	Region       string   `help:"CLDR region code (e.g. US, DE)."`
+	Lat          *float64 `help:"Latitude for location bias."`
+	Lng          *float64 `help:"Longitude for location bias."`
+	RadiusM      *float64 `help:"Radius in meters for location bias."`
 }
 
 // DetailsCmd fetches place details.

@@ -174,6 +174,40 @@ func (c *SearchCmd) Run(app *App) error {
 	return err
 }
 
+// Run executes the autocomplete command.
+func (c *AutocompleteCmd) Run(app *App) error {
+	request := goplaces.AutocompleteRequest{
+		Input:        c.Input,
+		Limit:        c.Limit,
+		SessionToken: c.SessionToken,
+		Language:     c.Language,
+		Region:       c.Region,
+	}
+
+	if c.Lat != nil || c.Lng != nil || c.RadiusM != nil {
+		if c.Lat == nil || c.Lng == nil || c.RadiusM == nil {
+			return goplaces.ValidationError{Field: "location_bias", Message: "lat, lng, radius required"}
+		}
+		request.LocationBias = &goplaces.LocationBias{
+			Lat:     *c.Lat,
+			Lng:     *c.Lng,
+			RadiusM: *c.RadiusM,
+		}
+	}
+
+	response, err := app.client.Autocomplete(context.Background(), request)
+	if err != nil {
+		return err
+	}
+
+	if app.json {
+		return writeJSON(app.out, response)
+	}
+
+	_, err = fmt.Fprintln(app.out, renderAutocomplete(app.color, response))
+	return err
+}
+
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
 	response, err := app.client.DetailsWithOptions(context.Background(), goplaces.DetailsRequest{

@@ -13,7 +13,7 @@ func renderSearch(color Color, response goplaces.SearchResponse) string {
 	var out bytes.Buffer
 	count := len(response.Results)
 	if count == 0 {
-		return "No results."
+		return emptyResultsMessage
 	}
 	out.WriteString(color.Bold(fmt.Sprintf("Results (%d)", count)))
 	out.WriteString("\n")
@@ -36,6 +36,26 @@ func renderSearch(color Color, response goplaces.SearchResponse) string {
 	return out.String()
 }
 
+func renderAutocomplete(color Color, response goplaces.AutocompleteResponse) string {
+	var out bytes.Buffer
+	count := len(response.Suggestions)
+	if count == 0 {
+		return emptyResultsMessage
+	}
+	out.WriteString(color.Bold(fmt.Sprintf("Suggestions (%d)", count)))
+	out.WriteString("\n")
+
+	for i, suggestion := range response.Suggestions {
+		title := formatTitle(color, autocompleteTitle(suggestion), autocompleteSubtitle(suggestion))
+		out.WriteString(fmt.Sprintf("%d. %s\n", i+1, title))
+		writeAutocompleteSuggestion(&out, color, suggestion)
+		if i < count-1 {
+			out.WriteString("\n")
+		}
+	}
+	return out.String()
+}
+
 func renderDetails(color Color, place goplaces.PlaceDetails) string {
 	var out bytes.Buffer
 	out.WriteString(color.Bold(formatTitle(color, place.Name, place.Address)))
@@ -48,7 +68,7 @@ func renderResolve(color Color, response goplaces.LocationResolveResponse) strin
 	var out bytes.Buffer
 	count := len(response.Results)
 	if count == 0 {
-		return "No results."
+		return emptyResultsMessage
 	}
 	out.WriteString(color.Bold(fmt.Sprintf("Resolved (%d)", count)))
 	out.WriteString("\n")
@@ -74,12 +94,41 @@ func formatTitle(color Color, name string, address string) string {
 	return color.Cyan(display) + " — " + address
 }
 
+const emptyResultsMessage = "No results."
+
+func autocompleteTitle(suggestion goplaces.AutocompleteSuggestion) string {
+	if strings.TrimSpace(suggestion.MainText) != "" {
+		return suggestion.MainText
+	}
+	return suggestion.Text
+}
+
+func autocompleteSubtitle(suggestion goplaces.AutocompleteSuggestion) string {
+	if strings.TrimSpace(suggestion.SecondaryText) != "" {
+		return suggestion.SecondaryText
+	}
+	if strings.TrimSpace(suggestion.Text) == "" || strings.TrimSpace(suggestion.MainText) == "" {
+		return ""
+	}
+	return suggestion.Text
+}
+
 func writePlaceSummary(out *bytes.Buffer, color Color, place goplaces.PlaceSummary) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
 	writeRating(out, color, place.Rating, place.PriceLevel)
 	writeTypes(out, color, place.Types)
 	writeOpenNow(out, color, place.OpenNow)
+}
+
+func writeAutocompleteSuggestion(out *bytes.Buffer, color Color, suggestion goplaces.AutocompleteSuggestion) {
+	writeLine(out, color, "Kind", suggestion.Kind)
+	writeLine(out, color, "ID", suggestion.PlaceID)
+	writeLine(out, color, "Place", suggestion.Place)
+	writeTypes(out, color, suggestion.Types)
+	if suggestion.DistanceMeters != nil {
+		writeLine(out, color, "Distance", fmt.Sprintf("%dm", *suggestion.DistanceMeters))
+	}
 }
 
 func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetails) {

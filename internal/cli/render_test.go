@@ -50,6 +50,40 @@ func TestRenderSearchEmpty(t *testing.T) {
 	}
 }
 
+func TestRenderAutocomplete(t *testing.T) {
+	response := goplaces.AutocompleteResponse{
+		Suggestions: []goplaces.AutocompleteSuggestion{
+			{
+				Kind:          "place",
+				PlaceID:       "abc",
+				MainText:      "Cafe",
+				SecondaryText: "Seattle",
+				Types:         []string{"cafe"},
+			},
+		},
+	}
+	output := renderAutocomplete(NewColor(false), response)
+	if !strings.Contains(output, "Suggestions") {
+		t.Fatalf("missing suggestions header")
+	}
+	if !strings.Contains(output, "Cafe") {
+		t.Fatalf("missing suggestion text")
+	}
+	if !strings.Contains(output, "Kind") {
+		t.Fatalf("missing kind label")
+	}
+	if !strings.Contains(output, "cafe") {
+		t.Fatalf("missing types")
+	}
+}
+
+func TestRenderAutocompleteEmpty(t *testing.T) {
+	output := renderAutocomplete(NewColor(false), goplaces.AutocompleteResponse{})
+	if !strings.Contains(output, "No results") {
+		t.Fatalf("unexpected output: %s", output)
+	}
+}
+
 func TestFormatTitleFallback(t *testing.T) {
 	title := formatTitle(NewColor(false), "", "")
 	if !strings.Contains(title, "(no name)") {

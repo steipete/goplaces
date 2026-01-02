@@ -69,3 +69,46 @@ func TestE2ESearchAndDetails(t *testing.T) {
 		t.Fatalf("expected details place id")
 	}
 }
+
+func TestE2EAutocomplete(t *testing.T) {
+	apiKey := os.Getenv("GOOGLE_PLACES_API_KEY")
+	if apiKey == "" {
+		t.Skip("GOOGLE_PLACES_API_KEY not set")
+	}
+
+	query := os.Getenv("GOOGLE_PLACES_E2E_QUERY")
+	if query == "" {
+		query = "coffee"
+	}
+	language := os.Getenv("GOOGLE_PLACES_E2E_LANGUAGE")
+	if language == "" {
+		language = "en"
+	}
+	region := os.Getenv("GOOGLE_PLACES_E2E_REGION")
+	if region == "" {
+		region = "US"
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	client := NewClient(Options{
+		APIKey:  apiKey,
+		BaseURL: os.Getenv("GOOGLE_PLACES_E2E_BASE_URL"),
+		Timeout: 10 * time.Second,
+	})
+
+	response, err := client.Autocomplete(ctx, AutocompleteRequest{
+		Input:        query,
+		Limit:        3,
+		Language:     language,
+		Region:       region,
+		SessionToken: "goplaces-e2e",
+	})
+	if err != nil {
+		t.Fatalf("autocomplete error: %v", err)
+	}
+	if len(response.Suggestions) == 0 {
+		t.Fatalf("expected autocomplete suggestions")
+	}
+}

@@ -5,6 +5,7 @@ Modern Go client + CLI for the Google Places API (New). Fast for humans, tidy fo
 ## Highlights
 
 - Text search with filters: keyword, type, open now, min rating, price levels.
+- Autocomplete suggestions for places + queries (session tokens supported).
 - Location bias (lat/lng/radius) and pagination tokens.
 - Place details: hours, phone, website, rating, price, types.
 - Optional reviews in details (`--reviews` / `IncludeReviews`).
@@ -66,6 +67,7 @@ goplaces [--api-key=KEY] [--base-url=URL] [--timeout=10s] [--json] [--no-color] 
          <command>
 
 Commands:
+  autocomplete  Autocomplete places and queries.
   search   Search places by text query.
   details  Fetch place details by place ID.
   resolve  Resolve a location string to candidate places.
@@ -82,6 +84,12 @@ Pagination:
 
 ```bash
 goplaces search "pizza" --page-token "NEXT_PAGE_TOKEN"
+```
+
+Autocomplete:
+
+```bash
+goplaces autocomplete "cof" --session-token "goplaces-demo" --limit 5 --language en --region US
 ```
 
 Details (with reviews):
@@ -132,6 +140,14 @@ details, err := client.DetailsWithOptions(ctx, goplaces.DetailsRequest{
     Region:         "US",
     IncludeReviews: true,
 })
+
+autocomplete, err := client.Autocomplete(ctx, goplaces.AutocompleteRequest{
+    Input:        "cof",
+    SessionToken: "goplaces-demo",
+    Limit:        5,
+    Language:     "en",
+    Region:       "US",
+})
 ```
 
 ## Notes
@@ -139,7 +155,7 @@ details, err := client.DetailsWithOptions(ctx, goplaces.DetailsRequest{
 - `Filters.Types` maps to `includedType` (Google accepts a single value). Only the first type is sent.
 - Price levels map to Google enums: `0` (free) → `4` (very expensive).
 - Reviews are returned only when `IncludeReviews`/`--reviews` is set.
-- Field masks are defined in `client.go`; extend them if you need more fields.
+- Field masks are defined alongside each request (e.g. `search.go`, `details.go`, `autocomplete.go`).
 - The Places API is billed and quota-limited; keep an eye on your Cloud Console quotas.
 
 ## Testing
