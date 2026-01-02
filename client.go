@@ -226,6 +226,7 @@ func (c *Client) doRequest(
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-Goog-Api-Key", c.apiKey)
+	// Field masks trim API payloads and keep responses fast/cheap.
 	request.Header.Set("X-Goog-FieldMask", fieldMask)
 
 	response, err := c.httpClient.Do(request)
@@ -236,6 +237,7 @@ func (c *Client) doRequest(
 		_ = response.Body.Close()
 	}()
 
+	// Hard-cap payload size to avoid runaway error bodies.
 	payload, err := io.ReadAll(io.LimitReader(response.Body, 1<<20))
 	if err != nil {
 		return nil, fmt.Errorf("goplaces: read response: %w", err)
@@ -278,6 +280,7 @@ func (c *Client) buildURL(path string, query map[string]string) (string, error) 
 func buildSearchBody(req SearchRequest) map[string]any {
 	textQuery := req.Query
 	if req.Filters != nil && strings.TrimSpace(req.Filters.Keyword) != "" {
+		// Google expects a single text query; append keywords here.
 		textQuery = strings.TrimSpace(textQuery + " " + req.Filters.Keyword)
 	}
 
@@ -297,6 +300,7 @@ func buildSearchBody(req SearchRequest) map[string]any {
 	}
 
 	if req.LocationBias != nil {
+		// Places API expects a circular bias object.
 		body["locationBias"] = map[string]any{
 			"circle": map[string]any{
 				"center": map[string]any{
@@ -311,6 +315,7 @@ func buildSearchBody(req SearchRequest) map[string]any {
 	if req.Filters != nil {
 		filters := req.Filters
 		if len(filters.Types) > 0 {
+			// API accepts a single includedType; use the first value.
 			body["includedType"] = filters.Types[0]
 		}
 		if filters.OpenNow != nil {
@@ -337,6 +342,7 @@ func buildSearchBody(req SearchRequest) map[string]any {
 
 func detailsFieldMaskForRequest(req DetailsRequest) string {
 	if req.IncludeReviews {
+		// Reviews are heavy; opt-in to include them.
 		return detailsFieldMaskBase + "," + detailsFieldMaskReview
 	}
 	return detailsFieldMaskBase
@@ -408,6 +414,7 @@ func mapLocalizedText(text *localizedTextPayload) *LocalizedText {
 	if text == nil {
 		return nil
 	}
+	// Avoid emitting empty text structs downstream.
 	if strings.TrimSpace(text.Text) == "" && strings.TrimSpace(text.LanguageCode) == "" {
 		return nil
 	}
@@ -421,6 +428,7 @@ func mapAuthorAttribution(author *authorAttributionPayload) *AuthorAttribution {
 	if author == nil {
 		return nil
 	}
+	// Drop empty attribution blocks to keep JSON clean.
 	if strings.TrimSpace(author.DisplayName) == "" && strings.TrimSpace(author.URI) == "" && strings.TrimSpace(author.PhotoURI) == "" {
 		return nil
 	}
@@ -435,6 +443,7 @@ func mapVisitDate(date *visitDatePayload) *ReviewVisitDate {
 	if date == nil {
 		return nil
 	}
+	// Treat zeroed dates as missing.
 	if date.Year == 0 && date.Month == 0 && date.Day == 0 {
 		return nil
 	}

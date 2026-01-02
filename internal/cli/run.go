@@ -64,6 +64,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 		return 2
 	}
 	if root.Global.JSON {
+		// JSON output should never include ANSI escapes.
 		root.Global.NoColor = true
 	}
 
@@ -97,6 +98,7 @@ func parseWithExit(parser *kong.Kong, args []string, exitCode *int) (ctx *kong.C
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			if signal, ok := recovered.(exitSignal); ok {
+				// kong uses Exit() hooks; convert to a normal return.
 				if exitCode != nil {
 					*exitCode = signal.code
 				}

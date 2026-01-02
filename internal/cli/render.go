@@ -115,6 +115,7 @@ func writeReviews(out *bytes.Buffer, color Color, reviews []goplaces.Review) {
 	out.WriteString(color.Dim("Reviews:"))
 	out.WriteString("\n")
 
+	// Keep CLI output compact by default.
 	const maxReviews = 3
 	count := len(reviews)
 	limit := count
@@ -212,6 +213,7 @@ func reviewText(review goplaces.Review) string {
 	if review.Text != nil {
 		text = review.Text.Text
 	}
+	// Fall back to original text when translation is empty.
 	if strings.TrimSpace(text) == "" && review.OriginalText != nil {
 		text = review.OriginalText.Text
 	}
@@ -225,6 +227,7 @@ func truncateText(value string, maxLen int) string {
 	if len(value) <= maxLen {
 		return value
 	}
+	// Byte-based truncation is OK here because we only display previews.
 	return strings.TrimSpace(value[:maxLen]) + "..."
 }
 
