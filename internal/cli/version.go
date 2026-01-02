@@ -6,8 +6,8 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-// Version is the CLI version string.
-const Version = "0.1.0"
+// Version is the CLI version string (set by GoReleaser).
+var Version = "dev"
 
 // VersionFlag prints the version and exits.
 type VersionFlag string

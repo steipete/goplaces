@@ -1,0 +1,51 @@
+version: 2
+
+project_name: goplaces
+
+builds:
+  - id: goplaces
+    main: ./cmd/goplaces
+    binary: goplaces
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/steipete/goplaces/internal/cli.Version={{.Version}}
+
+archives:
+  - id: goplaces
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+brews:
+  - name: goplaces
+    description: "Modern Go client + CLI for the Google Places API (New)."
+    homepage: "https://github.com/steipete/goplaces"
+    license: "MIT"
+    repository:
+      owner: steipete
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    install: |
+      bin.install "goplaces"
+    test: |
+      system "#{bin}/goplaces", "--version"
