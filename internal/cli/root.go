@@ -8,6 +8,7 @@ import (
 type Root struct {
 	Global  GlobalOptions `embed:""`
 	Search  SearchCmd     `cmd:"" help:"Search places by text query."`
+	Route   RouteCmd      `cmd:"" help:"Search places along a route."`
 	Details DetailsCmd    `cmd:"" help:"Fetch place details by place ID."`
 	Resolve ResolveCmd    `cmd:"" help:"Resolve a location string to candidate places."`
 }

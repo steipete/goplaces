@@ -63,6 +63,41 @@ func renderResolve(color Color, response goplaces.LocationResolveResponse) strin
 	return out.String()
 }
 
+func renderRoute(color Color, response goplaces.RouteResponse) string {
+	var out bytes.Buffer
+	count := len(response.Waypoints)
+	if count == 0 {
+		return "No results."
+	}
+	out.WriteString(color.Bold(fmt.Sprintf("Route waypoints (%d)", count)))
+	out.WriteString("\n")
+
+	for i, waypoint := range response.Waypoints {
+		out.WriteString(color.Bold(fmt.Sprintf("Waypoint %d", i+1)))
+		out.WriteString(" ")
+		out.WriteString(color.Dim(fmt.Sprintf("(%.6f, %.6f)", waypoint.Location.Lat, waypoint.Location.Lng)))
+		out.WriteString("\n")
+
+		if len(waypoint.Results) == 0 {
+			out.WriteString("No results.\n")
+		} else {
+			for j, place := range waypoint.Results {
+				out.WriteString(fmt.Sprintf("%d. %s\n", j+1, formatTitle(color, place.Name, place.Address)))
+				writePlaceSummary(&out, color, place)
+				if j < len(waypoint.Results)-1 {
+					out.WriteString("\n")
+				}
+			}
+		}
+
+		if i < count-1 {
+			out.WriteString("\n")
+		}
+	}
+
+	return out.String()
+}
+
 func formatTitle(color Color, name string, address string) string {
 	display := strings.TrimSpace(name)
 	if display == "" {
