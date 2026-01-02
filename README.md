@@ -1,7 +1,4 @@
-# 📍 goplaces
-
-*Find places, Go fast*
-
+# 📍 goplaces - *Find places, Go fast*
 
 Modern Go client + CLI for the Google Places API (New).
 
