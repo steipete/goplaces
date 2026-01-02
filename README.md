@@ -102,3 +102,19 @@ Enforce coverage:
 ```bash
 ./scripts/check-coverage.sh
 ```
+
+### E2E tests (optional)
+
+Real API tests (skipped unless you opt in):
+
+```bash
+export GOOGLE_PLACES_API_KEY="..."
+go test -tags=e2e ./... -run TestE2E
+```
+
+Optional env overrides:
+
+- `GOOGLE_PLACES_E2E_BASE_URL`
+- `GOOGLE_PLACES_E2E_QUERY`
+- `GOOGLE_PLACES_E2E_LANGUAGE`
+- `GOOGLE_PLACES_E2E_REGION`
