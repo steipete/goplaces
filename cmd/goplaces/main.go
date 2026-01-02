@@ -1,3 +1,4 @@
+// Package main implements the goplaces CLI entrypoint.
 package main
 
 import (
