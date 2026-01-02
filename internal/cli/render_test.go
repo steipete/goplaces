@@ -103,6 +103,34 @@ func TestRenderNearby(t *testing.T) {
 	}
 }
 
+func TestRenderRoute(t *testing.T) {
+	response := goplaces.RouteResponse{
+		Waypoints: []goplaces.RouteWaypoint{
+			{
+				Location: goplaces.LatLng{Lat: 1, Lng: 2},
+				Results:  []goplaces.PlaceSummary{{PlaceID: "place-1", Name: "Cafe"}},
+			},
+		},
+	}
+	output := renderRoute(NewColor(false), response)
+	if !strings.Contains(output, "Route waypoints") {
+		t.Fatalf("missing route header")
+	}
+	if !strings.Contains(output, "Waypoint 1") {
+		t.Fatalf("missing waypoint label")
+	}
+	if !strings.Contains(output, "Cafe") {
+		t.Fatalf("missing place name")
+	}
+}
+
+func TestRenderRouteEmpty(t *testing.T) {
+	output := renderRoute(NewColor(false), goplaces.RouteResponse{})
+	if !strings.Contains(output, "No results") {
+		t.Fatalf("unexpected output: %s", output)
+	}
+}
+
 func TestFormatTitleFallback(t *testing.T) {
 	title := formatTitle(NewColor(false), "", "")
 	if !strings.Contains(title, "(no name)") {

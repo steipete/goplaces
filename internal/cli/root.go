@@ -9,22 +9,23 @@ type Root struct {
 	Global       GlobalOptions   `embed:""`
 	Autocomplete AutocompleteCmd `cmd:"" help:"Autocomplete places and queries."`
 	Nearby       NearbyCmd       `cmd:"" help:"Search nearby places by location."`
-	Search       SearchCmd        `cmd:"" help:"Search places by text query."`
-	Route        RouteCmd         `cmd:"" help:"Search places along a route."`
-	Details      DetailsCmd       `cmd:"" help:"Fetch place details by place ID."`
-	Photo        PhotoCmd         `cmd:"" help:"Fetch a photo URL by photo name."`
-	Resolve      ResolveCmd       `cmd:"" help:"Resolve a location string to candidate places."`
+	Search       SearchCmd       `cmd:"" help:"Search places by text query."`
+	Route        RouteCmd        `cmd:"" help:"Search places along a route."`
+	Details      DetailsCmd      `cmd:"" help:"Fetch place details by place ID."`
+	Photo        PhotoCmd        `cmd:"" help:"Fetch a photo URL by photo name."`
+	Resolve      ResolveCmd      `cmd:"" help:"Resolve a location string to candidate places."`
 }
 
 // GlobalOptions are flags shared by all commands.
 type GlobalOptions struct {
-	APIKey  string        `help:"Google Places API key." env:"GOOGLE_PLACES_API_KEY"`
-	BaseURL string        `help:"Places API base URL." env:"GOOGLE_PLACES_BASE_URL" default:"https://places.googleapis.com/v1"`
-	Timeout time.Duration `help:"HTTP timeout." default:"10s"`
-	JSON    bool          `help:"Output JSON."`
-	NoColor bool          `help:"Disable color output."`
-	Verbose bool          `help:"Verbose logging."`
-	Version VersionFlag   `name:"version" help:"Print version and exit."`
+	APIKey        string        `help:"Google Places API key." env:"GOOGLE_PLACES_API_KEY"`
+	BaseURL       string        `help:"Places API base URL." env:"GOOGLE_PLACES_BASE_URL" default:"https://places.googleapis.com/v1"`
+	RoutesBaseURL string        `help:"Routes API base URL." env:"GOOGLE_ROUTES_BASE_URL" default:"https://routes.googleapis.com"`
+	Timeout       time.Duration `help:"HTTP timeout." default:"10s"`
+	JSON          bool          `help:"Output JSON."`
+	NoColor       bool          `help:"Disable color output."`
+	Verbose       bool          `help:"Verbose logging."`
+	Version       VersionFlag   `name:"version" help:"Print version and exit."`
 }
 
 // SearchCmd runs text search queries.

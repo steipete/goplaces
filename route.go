@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	routesEndpoint = "https://routes.googleapis.com/directions/v2:computeRoutes"
-	routesFieldMask = "routes.polyline.encodedPolyline"
+	defaultRoutesBaseURL = "https://routes.googleapis.com"
+	routesPath           = "/directions/v2:computeRoutes"
+	routesFieldMask      = "routes.polyline.encodedPolyline"
 )
 
 const (
@@ -165,8 +166,8 @@ func (c *Client) computeRoutePolyline(ctx context.Context, req RouteRequest) (st
 		"destination": map[string]any{
 			"address": req.To,
 		},
-		"travelMode":      req.Mode,
-		"polylineQuality": "OVERVIEW",
+		"travelMode":       req.Mode,
+		"polylineQuality":  "OVERVIEW",
 		"polylineEncoding": "ENCODED_POLYLINE",
 	}
 	if req.Language != "" {
@@ -176,7 +177,8 @@ func (c *Client) computeRoutePolyline(ctx context.Context, req RouteRequest) (st
 		body["regionCode"] = req.Region
 	}
 
-	payload, err := c.doRequest(ctx, http.MethodPost, routesEndpoint, body, routesFieldMask)
+	endpoint := c.routesBaseURL + routesPath
+	payload, err := c.doRequest(ctx, http.MethodPost, endpoint, body, routesFieldMask)
 	if err != nil {
 		return "", err
 	}

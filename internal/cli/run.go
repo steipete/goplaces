@@ -69,9 +69,10 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	}
 
 	client := goplaces.NewClient(goplaces.Options{
-		APIKey:  root.Global.APIKey,
-		BaseURL: root.Global.BaseURL,
-		Timeout: root.Global.Timeout,
+		APIKey:        root.Global.APIKey,
+		BaseURL:       root.Global.BaseURL,
+		RoutesBaseURL: root.Global.RoutesBaseURL,
+		Timeout:       root.Global.Timeout,
 	})
 
 	app := &App{

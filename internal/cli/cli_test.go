@@ -12,9 +12,11 @@ import (
 	"github.com/steipete/goplaces"
 )
 
+const placesSearchPath = "/places:searchText"
+
 func TestRunSearchJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/places:searchText" {
+		if r.URL.Path != placesSearchPath {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
 		_, _ = w.Write([]byte(`{"places": [{"id": "abc"}]}`))
@@ -232,6 +234,78 @@ func TestRunNearbyHuman(t *testing.T) {
 	}
 }
 
+func TestRunRouteJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/directions/v2:computeRoutes":
+			_, _ = w.Write([]byte("{\"routes\":[{\"polyline\":{\"encodedPolyline\":\"_p~iF~ps|U_ulLnnqC_mqNvxq`@\"}}]}"))
+		case placesSearchPath:
+			_, _ = w.Write([]byte(`{"places":[{"id":"abc","displayName":{"text":"Cafe"}}]}`))
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"route",
+		"coffee",
+		"--from", "A",
+		"--to", "B",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--routes-base-url", server.URL,
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "\"waypoints\"") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
+func TestRunRouteHuman(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/directions/v2:computeRoutes":
+			_, _ = w.Write([]byte("{\"routes\":[{\"polyline\":{\"encodedPolyline\":\"_p~iF~ps|U_ulLnnqC_mqNvxq`@\"}}]}"))
+		case placesSearchPath:
+			_, _ = w.Write([]byte(`{"places":[{"id":"abc","displayName":{"text":"Cafe"}}]}`))
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"route",
+		"coffee",
+		"--from", "A",
+		"--to", "B",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--routes-base-url", server.URL,
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "Route waypoints") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("unexpected stderr: %s", stderr.String())
+	}
+}
+
 func TestRunDetailsJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/places/place-1" {
@@ -399,7 +473,7 @@ func TestRunPhotoHuman(t *testing.T) {
 
 func TestRunResolveHuman(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/places:searchText" {
+		if r.URL.Path != placesSearchPath {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
 		_, _ = w.Write([]byte(`{"places": [{"id": "loc-1", "displayName": {"text": "Downtown"}}]}`))

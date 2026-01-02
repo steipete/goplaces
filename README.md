@@ -8,6 +8,7 @@ Modern Go client + CLI for the Google Places API (New). Fast for humans, tidy fo
 - Autocomplete suggestions for places + queries (session tokens supported).
 - Nearby search around a location restriction.
 - Place photos in details + photo media URLs.
+- Route search along a driving path (Routes API).
 - Location bias (lat/lng/radius) and pagination tokens.
 - Place details: hours, phone, website, rating, price, types.
 - Optional reviews in details (`--reviews` / `IncludeReviews`).
@@ -31,6 +32,7 @@ export GOOGLE_PLACES_API_KEY="..."
 Optional overrides:
 
 - `GOOGLE_PLACES_BASE_URL` (testing, proxying, or mock servers)
+- `GOOGLE_ROUTES_BASE_URL` (testing Routes API or proxying)
 
 ### Getting a Google Places API Key
 
@@ -44,18 +46,22 @@ Optional overrides:
    - Search for "Places API (New)" — make sure it says **(New)**!
    - Click "Enable"
 
-3. **Create an API Key**
+3. **Enable the Routes API (for `route`)**
+   - Search for "Routes API"
+   - Click "Enable"
+
+4. **Create an API Key**
    - Go to [APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials)
    - Click "Create Credentials" → "API Key"
    - Copy the key
 
-4. **Set the Environment Variable**
+5. **Set the Environment Variable**
    ```bash
    export GOOGLE_PLACES_API_KEY="your-api-key-here"
    ```
    Add to your `~/.zshrc` or `~/.bashrc` to persist.
 
-5. **(Recommended) Restrict the Key**
+6. **(Recommended) Restrict the Key**
    - Click on the key in Credentials
    - Under "API restrictions", select "Restrict key" → "Places API (New)"
    - Set quota limits in [Quotas](https://console.cloud.google.com/apis/api/places.googleapis.com/quotas)
@@ -65,13 +71,14 @@ Optional overrides:
 ## CLI
 
 ```text
-goplaces [--api-key=KEY] [--base-url=URL] [--timeout=10s] [--json] [--no-color] [--verbose]
+goplaces [--api-key=KEY] [--base-url=URL] [--routes-base-url=URL] [--timeout=10s] [--json] [--no-color] [--verbose]
          <command>
 
 Commands:
   autocomplete  Autocomplete places and queries.
   nearby        Search nearby places by location.
   search   Search places by text query.
+  route    Search places along a route.
   details  Fetch place details by place ID.
   photo    Fetch a photo URL by photo name.
   resolve  Resolve a location string to candidate places.
@@ -100,6 +107,12 @@ Nearby search:
 
 ```bash
 goplaces nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 --type cafe --limit 5
+```
+
+Route search:
+
+```bash
+goplaces route "coffee" --from "Seattle, WA" --to "Portland, OR" --max-waypoints 5
 ```
 
 Details (with reviews):
@@ -181,6 +194,13 @@ photo, err := client.PhotoMedia(ctx, goplaces.PhotoMediaRequest{
     Name:       "places/PLACE_ID/photos/PHOTO_ID",
     MaxWidthPx: 1200,
 })
+
+route, err := client.Route(ctx, goplaces.RouteRequest{
+    Query:        "coffee",
+    From:         "Seattle, WA",
+    To:           "Portland, OR",
+    MaxWaypoints: 5,
+})
 ```
 
 ## Notes
@@ -189,6 +209,7 @@ photo, err := client.PhotoMedia(ctx, goplaces.PhotoMediaRequest{
 - Price levels map to Google enums: `0` (free) → `4` (very expensive).
 - Reviews are returned only when `IncludeReviews`/`--reviews` is set.
 - Photos are returned only when `IncludePhotos`/`--photos` is set.
+- Route search requires the Google Routes API to be enabled.
 - Field masks are defined alongside each request (e.g. `search.go`, `details.go`, `autocomplete.go`).
 - The Places API is billed and quota-limited; keep an eye on your Cloud Console quotas.
 
