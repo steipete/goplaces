@@ -29,6 +29,13 @@ Optional overrides:
 
 - `GOOGLE_PLACES_BASE_URL` (testing, proxying, or mock servers)
 
+### Getting an API key
+
+1) Create a Google Cloud project.
+2) Enable **Places API (New)** in the API Library.
+3) Create an API key in **APIs & Services → Credentials**.
+4) Restrict the key (HTTP referrers or IPs) and set quota/billing limits.
+
 ## CLI
 
 ```text
