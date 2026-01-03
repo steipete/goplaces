@@ -168,7 +168,13 @@ func (c *SearchCmd) Run(app *App) error {
 	}
 
 	if app.json {
-		return writeJSON(app.out, response)
+		if err := writeJSON(app.out, response.Results); err != nil {
+			return err
+		}
+		if response.NextPageToken != "" {
+			_, _ = fmt.Fprintln(app.err, "next_page_token:", response.NextPageToken)
+		}
+		return nil
 	}
 
 	_, err = fmt.Fprintln(app.out, renderSearch(app.color, response))
@@ -202,7 +208,7 @@ func (c *AutocompleteCmd) Run(app *App) error {
 	}
 
 	if app.json {
-		return writeJSON(app.out, response)
+		return writeJSON(app.out, response.Suggestions)
 	}
 
 	_, err = fmt.Fprintln(app.out, renderAutocomplete(app.color, response))
@@ -234,7 +240,13 @@ func (c *NearbyCmd) Run(app *App) error {
 	}
 
 	if app.json {
-		return writeJSON(app.out, response)
+		if err := writeJSON(app.out, response.Results); err != nil {
+			return err
+		}
+		if response.NextPageToken != "" {
+			_, _ = fmt.Fprintln(app.err, "next_page_token:", response.NextPageToken)
+		}
+		return nil
 	}
 
 	_, err = fmt.Fprintln(app.out, renderNearby(app.color, response))
@@ -296,7 +308,7 @@ func (c *ResolveCmd) Run(app *App) error {
 	}
 
 	if app.json {
-		return writeJSON(app.out, response)
+		return writeJSON(app.out, response.Results)
 	}
 
 	_, err = fmt.Fprintln(app.out, renderResolve(app.color, response))
