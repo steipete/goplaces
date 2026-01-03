@@ -40,8 +40,9 @@ func TestRunSearchJSON(t *testing.T) {
 	if stderr.Len() != 0 {
 		t.Fatalf("unexpected stderr: %s", stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "\"results\"") {
-		t.Fatalf("unexpected stdout: %s", stdout.String())
+	// JSON output should be an array, not an object with "results" key
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
 	}
 }
 
@@ -115,8 +116,9 @@ func TestRunSearchWithFilters(t *testing.T) {
 	if stderr.Len() != 0 {
 		t.Fatalf("unexpected stderr: %s", stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "\"results\"") {
-		t.Fatalf("unexpected stdout: %s", stdout.String())
+	// JSON output should be an array, not an object with "results" key
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
 	}
 }
 
@@ -143,8 +145,9 @@ func TestRunAutocompleteJSON(t *testing.T) {
 	if exitCode != 0 {
 		t.Fatalf("expected exit code 0, got %d (stdout=%s stderr=%s)", exitCode, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "\"suggestions\"") {
-		t.Fatalf("unexpected stdout: %s", stdout.String())
+	// JSON output should be an array, not an object with "suggestions" key
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
 	}
 }
 
@@ -200,8 +203,9 @@ func TestRunNearbyJSON(t *testing.T) {
 	if exitCode != 0 {
 		t.Fatalf("expected exit code 0, got %d", exitCode)
 	}
-	if !strings.Contains(stdout.String(), "\"results\"") {
-		t.Fatalf("unexpected stdout: %s", stdout.String())
+	// JSON output should be an array, not an object with "results" key
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
 	}
 }
 
@@ -555,8 +559,9 @@ func TestRunResolveJSON(t *testing.T) {
 	if exitCode != 0 {
 		t.Fatalf("expected exit code 0, got %d", exitCode)
 	}
-	if !strings.Contains(stdout.String(), "\"results\"") {
-		t.Fatalf("unexpected stdout: %s", stdout.String())
+	// JSON output should be an array, not an object with "results" key
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
 	}
 }
 
@@ -630,6 +635,74 @@ func TestVersionFlagIsBool(t *testing.T) {
 	var flag VersionFlag
 	if !flag.IsBool() {
 		t.Fatalf("expected IsBool true")
+	}
+}
+
+func TestRunSearchJSONWithNextPageToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != placesSearchPath {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		_, _ = w.Write([]byte(`{"places": [{"id": "abc"}], "nextPageToken": "token123"}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"search",
+		"coffee",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d (stdout=%s stderr=%s)", exitCode, stdout.String(), stderr.String())
+	}
+	// JSON output should be an array
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
+	}
+	// next_page_token should be written to stderr
+	if !strings.Contains(stderr.String(), "next_page_token: token123") {
+		t.Fatalf("expected next_page_token in stderr, got: %s", stderr.String())
+	}
+}
+
+func TestRunNearbyJSONWithNextPageToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/places:searchNearby" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		_, _ = w.Write([]byte(`{"places": [{"id": "abc"}], "nextPageToken": "nearby-token"}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"nearby",
+		"--lat", "1",
+		"--lng", "2",
+		"--radius-m", "3",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	// JSON output should be an array
+	if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "[") {
+		t.Fatalf("expected JSON array output, got: %s", stdout.String())
+	}
+	// next_page_token should be written to stderr
+	if !strings.Contains(stderr.String(), "next_page_token: nearby-token") {
+		t.Fatalf("expected next_page_token in stderr, got: %s", stderr.String())
 	}
 }
 
