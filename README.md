@@ -139,10 +139,16 @@ Resolve:
 goplaces resolve "Riverside Park, New York" --limit 5
 ```
 
-JSON output:
+JSON output (arrays for search/nearby/autocomplete/resolve):
 
 ```bash
-goplaces search "sushi" --json
+goplaces search "sushi" --json | jq '.[0]'
+```
+
+Search/nearby pagination tokens are printed to stderr to keep stdout clean:
+
+```bash
+goplaces search "sushi" --json 2>token.txt | jq '.[0]'
 ```
 
 ## Library

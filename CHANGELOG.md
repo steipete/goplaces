@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 - Unreleased
+
+- CLI: JSON output for search/nearby/autocomplete/resolve now emits arrays; pagination token goes to stderr. (#2) — thanks @salmonumbrella
+
 ## 0.2.0 - 2026-01-02
 
 - Autocomplete suggestions for places and queries (client + CLI).
