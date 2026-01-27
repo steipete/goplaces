@@ -188,7 +188,7 @@ func autocompleteSubtitle(suggestion goplaces.AutocompleteSuggestion) string {
 func writePlaceSummary(out *bytes.Buffer, color Color, place goplaces.PlaceSummary) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
-	writeRating(out, color, place.Rating, place.PriceLevel)
+	writeRating(out, color, place.Rating, place.UserRatingCount, place.PriceLevel)
 	writeTypes(out, color, place.Types)
 	writeOpenNow(out, color, place.OpenNow)
 }
@@ -206,7 +206,7 @@ func writeAutocompleteSuggestion(out *bytes.Buffer, color Color, suggestion gopl
 func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetails) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
-	writeRating(out, color, place.Rating, place.PriceLevel)
+	writeRating(out, color, place.Rating, place.UserRatingCount, place.PriceLevel)
 	writeTypes(out, color, place.Types)
 	writeOpenNow(out, color, place.OpenNow)
 	writeLine(out, color, "Phone", place.Phone)
@@ -300,13 +300,17 @@ func writeLocation(out *bytes.Buffer, color Color, loc *goplaces.LatLng) {
 	writeLine(out, color, "Location", fmt.Sprintf("%.6f, %.6f", loc.Lat, loc.Lng))
 }
 
-func writeRating(out *bytes.Buffer, color Color, rating *float64, priceLevel *int) {
+func writeRating(out *bytes.Buffer, color Color, rating *float64, userRatingCount *int, priceLevel *int) {
 	if rating == nil && priceLevel == nil {
 		return
 	}
-	parts := make([]string, 0, 2)
+	parts := make([]string, 0, 3)
 	if rating != nil {
-		parts = append(parts, fmt.Sprintf("%.1f", *rating))
+		ratingStr := fmt.Sprintf("%.1f", *rating)
+		if userRatingCount != nil {
+			ratingStr += fmt.Sprintf(" (%d)", *userRatingCount)
+		}
+		parts = append(parts, ratingStr)
 	}
 	if priceLevel != nil {
 		parts = append(parts, fmt.Sprintf("$%d", *priceLevel))

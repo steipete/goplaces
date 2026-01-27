@@ -11,6 +11,7 @@ type placeItem struct {
 	FormattedAddress    string              `json:"formattedAddress,omitempty"`
 	Location            *location           `json:"location,omitempty"`
 	Rating              *float64            `json:"rating,omitempty"`
+	UserRatingCount     *int                `json:"userRatingCount,omitempty"`
 	PriceLevel          string              `json:"priceLevel,omitempty"`
 	Types               []string            `json:"types,omitempty"`
 	CurrentOpeningHours *openingHours       `json:"currentOpeningHours,omitempty"`
