@@ -84,24 +84,26 @@ type NearbySearchResponse struct {
 
 // PlaceSummary is a compact view of a place.
 type PlaceSummary struct {
-	PlaceID    string   `json:"place_id"`
-	Name       string   `json:"name,omitempty"`
-	Address    string   `json:"address,omitempty"`
-	Location   *LatLng  `json:"location,omitempty"`
-	Rating     *float64 `json:"rating,omitempty"`
-	PriceLevel *int     `json:"price_level,omitempty"`
-	Types      []string `json:"types,omitempty"`
-	OpenNow    *bool    `json:"open_now,omitempty"`
+	PlaceID         string   `json:"place_id"`
+	Name            string   `json:"name,omitempty"`
+	Address         string   `json:"address,omitempty"`
+	Location        *LatLng  `json:"location,omitempty"`
+	Rating          *float64 `json:"rating,omitempty"`
+	UserRatingCount *int     `json:"user_rating_count,omitempty"`
+	PriceLevel      *int     `json:"price_level,omitempty"`
+	Types           []string `json:"types,omitempty"`
+	OpenNow         *bool    `json:"open_now,omitempty"`
 }
 
 // PlaceDetails is a detailed view of a place.
 type PlaceDetails struct {
-	PlaceID    string   `json:"place_id"`
-	Name       string   `json:"name,omitempty"`
-	Address    string   `json:"address,omitempty"`
-	Location   *LatLng  `json:"location,omitempty"`
-	Rating     *float64 `json:"rating,omitempty"`
-	PriceLevel *int     `json:"price_level,omitempty"`
+	PlaceID         string   `json:"place_id"`
+	Name            string   `json:"name,omitempty"`
+	Address         string   `json:"address,omitempty"`
+	Location        *LatLng  `json:"location,omitempty"`
+	Rating          *float64 `json:"rating,omitempty"`
+	UserRatingCount *int     `json:"user_rating_count,omitempty"`
+	PriceLevel      *int     `json:"price_level,omitempty"`
 	Types      []string `json:"types,omitempty"`
 	Phone      string   `json:"phone,omitempty"`
 	Website    string   `json:"website,omitempty"`
